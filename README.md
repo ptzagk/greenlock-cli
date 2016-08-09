@@ -25,7 +25,7 @@ Choose **Stable** from <https://nodejs.org/en/>
 For Linux and **OS X**:
 
 ```
-curl -L bit.ly/iojs-min | bash
+curl -L bit.ly/nodejs-min | bash
 ```
 
 # Install LetsEncrypt
