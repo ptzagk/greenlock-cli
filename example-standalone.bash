@@ -1,8 +1,8 @@
 #!/bin/bash
 
 node bin/letsencrypt certonly \
-  --agree-tos --email 'coolaj86+le.1010@gmail.com' \
+  --agree-tos --email 'john.doe@gmail.com' \
   --standalone \
-  --domains pokemap.hellabit.com,www.pokemap.hellabit.com \
+  --domains example.com,www.example.com \
   --server https://acme-staging.api.letsencrypt.org/directory \
-  --config-dir ~/letsencrypt.test2/etc
+  --config-dir ~/letsencrypt.test/etc
