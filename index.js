@@ -19,12 +19,16 @@ module.exports.run = function (args) {
     challengeType = 'http-01';
   }
 
-  if (args.webrootPath) {
+  if (args.manual) {
+    leChallenge = require('le-challenge-manual').create({});
+  }
+  else if (args.webrootPath) {
     // webrootPath is all that really matters here
+    // TODO rename le-challenge-fs to le-challenge-webroot
     leChallenge = require('./lib/webroot').create({ webrootPath: args.webrootPath });
   }
   else if (USE_DNS !== args.standalone) {
-    leChallenge = require('./lib/standalone').create({});
+    leChallenge = require('le-challenge-standalone').create({});
     servers = require('./lib/servers').create(leChallenge).startServers(
       args.http01Port || [80], args.tlsSni01Port || [443, 5001]
     , { debug: args.debug }

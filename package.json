@@ -36,6 +36,8 @@
     "cli": "^0.11.1",
     "homedir": "^0.6.0",
     "le-acme-core": "^2.0.5",
+    "le-challenge-manual": "^2.0.0",
+    "le-challenge-standalone": "^2.0.0",
     "le-store-certbot": "^2.0.2",
     "letsencrypt": "^2.0.3",
     "localhost.daplie.com-certificates": "^1.2.0",

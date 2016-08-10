@@ -186,6 +186,9 @@ Options:
 
       --standalone [BOOLEAN]    Obtain certs using a "standalone" webserver.  (Default is true)
 
+      --manual [BOOLEAN]        Print the token and key to the screen and wait for you to hit enter,
+                                giving you time to copy it somewhere before continuing. (Default is false)
+
       --webroot BOOLEAN         Obtain certs by placing files in a webroot directory.
 
       --webroot-path STRING      public_html / webroot path.
