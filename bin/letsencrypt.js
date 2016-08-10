@@ -10,13 +10,15 @@ cli.parse({
 , duplicate: [ false, " Allow getting a certificate that duplicates an existing one", 'boolean', false ]
 , 'agree-tos': [ false, " Agree to the Let's Encrypt Subscriber Agreement", 'boolean', false ]
 , debug: [ false, " show traces and logs", 'boolean', false ]
-, 'tls-sni-01-port': [ false, " Port number to perform tls-sni-01 challenge. Boulder in testing mode defaults to 5001. (default: 443,5001)", 'string' ]
-, 'http-01-port': [ false, " Port used in the SimpleHttp challenge. (default: 80)", 'string' ]
+, 'tls-sni-01-port': [ false, " Use TLS-SNI-01 challenge type with this port (only port 443 is valid with most production servers) (default: 443,5001)", 'string' ]
+, 'http-01-port': [ false, " Use HTTP-01 challenge type with this port (only port 80 is valid with most production servers) (default: 80)", 'string' ]
+, 'dns-01': [ false, " Use DNS-01 challange type", 'boolean', false ]
 , 'rsa-key-size': [ false, " Size (in bits) of the RSA key.", 'int', 2048 ]
-, 'cert-path': [ false, " Path to where new cert.pem is saved", 'string',':config/live/:hostname/cert.pem' ]
-, 'fullchain-path': [ false, " Path to where new fullchain.pem (cert + chain) is saved", 'string', ':config/live/:hostname/fullchain.pem' ]
-, 'chain-path': [ false, " Path to where new chain.pem is saved", 'string', ':config/live/:hostname/chain.pem' ]
+, 'cert-path': [ false, " Path to where new cert.pem is saved", 'string',':configDir/live/:hostname/cert.pem' ]
+, 'fullchain-path': [ false, " Path to where new fullchain.pem (cert + chain) is saved", 'string', ':configDir/live/:hostname/fullchain.pem' ]
+, 'chain-path': [ false, " Path to where new chain.pem is saved", 'string', ':configDir/live/:hostname/chain.pem' ]
 , 'domain-key-path': [ false, " Path to privkey.pem to use for domain (default: generate new)", 'string' ]
+, 'account-key-path': [ false, " Path to privkey.pem to use for account (default: generate new)", 'string' ]
 , 'config-dir': [ false, " Configuration directory.", 'string', '~/letsencrypt/etc/' ]
 , server: [ false, " ACME Directory Resource URI.", 'string', 'https://acme-v01.api.letsencrypt.org/directory)' ]
 , standalone: [ false, " Obtain certs using a \"standalone\" webserver.", 'boolean', false ]
@@ -49,7 +51,7 @@ cli.main(function(_, options) {
     var val = args[key];
 
     if ('string' === typeof val) {
-      val = val.replace(/\:config/, args.configDir);
+      val = val.replace(/(\:configDir)|(\:config)/, args.configDir);
     }
 
     args[key] = val;
@@ -88,54 +90,6 @@ cli.main(function(_, options) {
       return;
     }
 
-    var LE = require('letsencrypt');
-    var handlers;
-
-    if (args.webrootPath) {
-      handlers = require('../lib/webroot').create(args);
-    }
-    else /*if (args.standalone)*/ {
-      handlers = require('../lib/standalone').create();
-      handlers.startServers(args.http01Port || [80], args.tlsSni01Port || [443, 5001]);
-    }
-
-    // let LE know that we're handling standalone / webroot here
-    LE.create({
-      manual: true
-    , debug: args.debug
-    , configDir: args.configDir
-    , privkeyPath: ':config/live/:hostname/privkey.pem' //args.privkeyPath
-    , fullchainPath: args.fullchainPath
-    , certPath: args.certPath
-    , chainPath: args.chainPath
-    }, handlers).register(args, function (err, results) {
-      if (err) {
-        console.error('[Error]: letsencrypt-cli');
-        console.error(err.stack || err);
-        return;
-      }
-
-      if (!results || ('object' !== typeof results)) {
-        console.error("Error: An unknown error occurred. My best guess is that we got an error that we're not used to from the ACME server and accidentally interpretted it as a success... or forgot to expose the error.");
-        console.error(results);
-        err = new Error("Here's a stack trace, in case it helps:");
-        console.error(err.stack);
-        return;
-      }
-
-      if (handlers.closeServers) {
-        handlers.closeServers();
-      }
-
-      // should get back account, path to certs, pems, etc?
-      console.log('\nCertificates installed at:');
-      console.log(Object.keys(results).filter(function (key) {
-        return /Path/.test(key);
-      }).map(function (key) {
-        return results[key];
-      }).join('\n'));
-
-      process.exit(0);
-    });
+    require('../').run(args);
   });
 });

@@ -1,7 +1,7 @@
 [![Join the chat at https://gitter.im/Daplie/letsencrypt-express](https://badges.gitter.im/Daplie/letsencrypt-express.svg)](https://gitter.im/Daplie/letsencrypt-express?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 | [letsencrypt (library)](https://github.com/Daplie/node-letsencrypt)
-| **letsencrypt-cli** 
+| **letsencrypt-cli**
 | [letsencrypt-express](https://github.com/Daplie/letsencrypt-express)
 | [letsencrypt-koa](https://github.com/Daplie/letsencrypt-koa)
 | [letsencrypt-hapi](https://github.com/Daplie/letsencrypt-hapi)
@@ -138,7 +138,7 @@ you could change the permissions on them. **Probably a BAD IDEA**. Probabry a se
 
 ```
 # PROBABLY A BAD IDEA
-sudo chown -R $(whoami) /etc/letsencrypt /var/lib/letsencrypt /var/log/letsencrypt 
+sudo chown -R $(whoami) /etc/letsencrypt /var/lib/letsencrypt /var/log/letsencrypt
 ```
 
 ## Command line Options
@@ -159,10 +159,13 @@ Options:
 
       --debug BOOLEAN           show traces and logs
 
-      --tls-sni-01-port NUMBER  Port number to perform tls-sni-01 challenge.
-                                Boulder in testing mode defaults to 5001. (default: 443 and 5001)
+      --tls-sni-01-port NUMBER  Use TLS-SNI-01 challenge type with this port. (Default is 443)
+                                (must be 443 with most production servers) (Boulder allows 5001 in testing mode)
 
-      --http-01-port [NUMBER]   Port used in the SimpleHttp challenge. (Default is 80)
+      --http-01-port [NUMBER]   Use HTTP-01 challenge type with this port, used for SimpleHttp challenge. (Default is 80)
+                                (must be 80 with most production servers)
+
+      --dns-01                  Use DNS-01 challenge type.
 
       --rsa-key-size [NUMBER]   Size (in bits) of the RSA key. (Default is 2048)
 
