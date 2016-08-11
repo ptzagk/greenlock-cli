@@ -20,7 +20,7 @@ cli.parse({
 , 'domain-key-path': [ false, " Path to privkey.pem to use for domain (default: generate new)", 'string' ]
 , 'account-key-path': [ false, " Path to privkey.pem to use for account (default: generate new)", 'string' ]
 , 'config-dir': [ false, " Configuration directory.", 'string', '~/letsencrypt/etc/' ]
-, server: [ false, " ACME Directory Resource URI.", 'string', 'https://acme-v01.api.letsencrypt.org/directory)' ]
+, server: [ false, " ACME Directory Resource URI.", 'string', '' ]
 , standalone: [ false, " Obtain certs using a \"standalone\" webserver.", 'boolean', false ]
 , manual: [ false, " Print the token and key to the screen and wait for you to hit enter, giving you time to copy it somewhere before continuing (default: false)", 'boolean', false ]
 , webroot: [ false, " Obtain certs by placing files in a webroot directory.", 'boolean', false ]

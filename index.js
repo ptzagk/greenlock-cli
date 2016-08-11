@@ -46,6 +46,10 @@ module.exports.run = function (args) {
   , accountKeyPath: args.accountKeyPath
   });
 
+  if (!args.server) {
+    throw new Error("You must specify a server to use with --server");
+  }
+
   // let LE know that we're handling standalone / webroot here
   var le = LE.create({
     debug: args.debug
