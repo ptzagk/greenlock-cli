@@ -31,7 +31,7 @@ curl -L bit.ly/nodejs-min | bash
 # Install LetsEncrypt
 
 ```bash
-npm install -g letsencrypt-cli
+npm install -g letsencrypt-cli@2.x
 ```
 
 ## Usage
