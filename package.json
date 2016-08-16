@@ -39,7 +39,7 @@
     "le-challenge-manual": "^2.0.0",
     "le-challenge-standalone": "^2.0.0",
     "le-store-certbot": "^2.0.2",
-    "letsencrypt": "^2.0.3",
+    "letsencrypt": "^2.1.2",
     "localhost.daplie.com-certificates": "^1.2.0",
     "mkdirp": "^0.5.1"
   }
