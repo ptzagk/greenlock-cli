@@ -98,6 +98,21 @@ ls /etc/letsencrypt/live/
 You can use a cron job to run the script above every 80 days (the certificates expire after 90 days)
 so that you always have fresh certificates.
 
+### Interactive (for debugging)
+
+The token (for all challenge types) and keyAuthorization (only for https-01)
+will be printed to the screen and you will be given time to copy it wherever
+(file, dns record, database, etc) and the process will complete once you hit `enter`.
+
+```bash
+sudo letsencrypt certonly \
+  --agree-tos --email john.doe@example.com \
+  --manual
+  --config-dir /etc/letsencrypt \
+  --domains example.com,www.example.com \
+  --server https://acme-staging.api.letsencrypt.org/directory
+```
+
 ## Test with a free domain
 
 ```bash
