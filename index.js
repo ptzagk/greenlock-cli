@@ -55,7 +55,7 @@ module.exports.run = function (args) {
     debug: args.debug
   , server: args.server
   , store: leStore
-  , challenge: leChallenge
+  , challenges: { 'http-01': leChallenge, 'tls-sni-01': leChallenge }
   , duplicate: args.duplicate
   });
 
