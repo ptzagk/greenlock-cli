@@ -15,6 +15,7 @@ module.exports.run = function (args) {
     args.standalone = USE_DNS;
   } else if (args.tlsSni01Port) {
     challengeType = 'tls-sni-01';
+    args.webrootPath = '';
   } else /*if (args.http01Port)*/ {
     challengeType = 'http-01';
   }
@@ -27,12 +28,13 @@ module.exports.run = function (args) {
     // TODO rename le-challenge-fs to le-challenge-webroot
     leChallenge = require('./lib/webroot').create({ webrootPath: args.webrootPath });
   }
+  else if (args.tlsSni01Port) {
+    leChallenge = require('le-challenge-sni').create({});
+    servers = require('./lib/servers').create(leChallenge);
+  }
   else if (USE_DNS !== args.standalone) {
     leChallenge = require('le-challenge-standalone').create({});
-    servers = require('./lib/servers').create(leChallenge).startServers(
-      args.http01Port || [80], args.tlsSni01Port || [443, 5001]
-    , { debug: args.debug }
-    );
+    servers = require('./lib/servers').create(leChallenge);
   }
 
   leStore = require('le-store-certbot').create({
@@ -51,13 +53,30 @@ module.exports.run = function (args) {
   }
 
   // let LE know that we're handling standalone / webroot here
+  var leChallenges = {};
+  leChallenges[challengeType] = leChallenge;
   var le = LE.create({
     debug: args.debug
   , server: args.server
   , store: leStore
-  , challenges: { 'http-01': leChallenge, 'tls-sni-01': leChallenge }
+  , challenges: leChallenges
   , duplicate: args.duplicate
   });
+
+  if (servers) {
+    if (args.tlsSni01Port) {
+      servers = servers.startServers(
+        [], args.tlsSni01Port
+      , { debug: args.debug, httpsOptions: le.httpsOptions }
+      );
+    }
+    else {
+      servers = servers.startServers(
+        args.http01Port || [80], []
+      , { debug: args.debug }
+      );
+    }
+  }
 
   // Note: can't use args directly as null values will overwrite template values
   le.register({
