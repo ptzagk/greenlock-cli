@@ -48,13 +48,25 @@ multiple domains doesn't work for you, file a bug.
 
 ### Standalone
 
-You can run standalone mode to get a cert **on the server** you will be
-using it for over ports **80 and 443 (or 5001)** like so:
+You can run standalone mode to get a cert **on the server**. You either use an
+http-01 challenge (the default) on port 80, or a tls-sni-01 challenge on port
+443 (or 5001). Like so:
 
 ```bash
 letsencrypt certonly \
   --agree-tos --email john.doe@example.com \
   --standalone \
+  --domains example.com,www.example.com \
+  --server https://acme-staging.api.letsencrypt.org/directory \
+  --config-dir ~/letsencrypt/etc
+```
+
+or
+
+```bash
+letsencrypt certonly \
+  --agree-tos --email john.doe@example.com \
+  --standalone --tls-sni-01-port 443 \
   --domains example.com,www.example.com \
   --server https://acme-staging.api.letsencrypt.org/directory \
   --config-dir ~/letsencrypt/etc
@@ -174,7 +186,7 @@ Options:
 
       --debug BOOLEAN           show traces and logs
 
-      --tls-sni-01-port NUMBER  Use TLS-SNI-01 challenge type with this port. (Default is 443)
+      --tls-sni-01-port NUMBER  Use TLS-SNI-01 challenge type with this port.
                                 (must be 443 with most production servers) (Boulder allows 5001 in testing mode)
 
       --http-01-port [NUMBER]   Use HTTP-01 challenge type with this port, used for SimpleHttp challenge. (Default is 80)
