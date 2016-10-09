@@ -5,14 +5,12 @@ var cli = require('cli');
 var mkdirp = require('mkdirp');
 
 cli.parse({
-  email: [ false, " Email used for registration and recovery contact. (default: null)", 'email' ]
-, domains: [ false, " Domain names to apply. For multiple domains you can enter a comma separated list of domains as a parameter. (default: [])", 'string' ]
-, duplicate: [ false, " Allow getting a certificate that duplicates an existing one", 'boolean', false ]
+  server: [ false, " ACME Directory Resource URI.", 'string', '' ]
+, email: [ false, " Email used for registration and recovery contact. (default: null)", 'email' ]
 , 'agree-tos': [ false, " Agree to the Let's Encrypt Subscriber Agreement", 'boolean', false ]
-, debug: [ false, " show traces and logs", 'boolean', false ]
-, 'tls-sni-01-port': [ false, " Use TLS-SNI-01 challenge type with this port (only port 443 is valid with most production servers)", 'int' ]
-, 'http-01-port': [ false, " Use HTTP-01 challenge type with this port (only port 80 is valid with most production servers) (default: 80)", 'int' ]
-, 'dns-01': [ false, " Use DNS-01 challange type", 'boolean', false ]
+, domains: [ false, " Domain names to apply. For multiple domains you can enter a comma separated list of domains as a parameter. (default: [])", 'string' ]
+, 'renew-within': [ false, " Renew certificates this many days before expiry", 'int', 7 ]
+, duplicate: [ false, " Allow getting a certificate that duplicates an existing one/is an early renewal", 'boolean', false ]
 , 'rsa-key-size': [ false, " Size (in bits) of the RSA key.", 'int', 2048 ]
 , 'cert-path': [ false, " Path to where new cert.pem is saved", 'string',':configDir/live/:hostname/cert.pem' ]
 , 'fullchain-path': [ false, " Path to where new fullchain.pem (cert + chain) is saved", 'string', ':configDir/live/:hostname/fullchain.pem' ]
@@ -20,7 +18,9 @@ cli.parse({
 , 'domain-key-path': [ false, " Path to privkey.pem to use for domain (default: generate new)", 'string' ]
 , 'account-key-path': [ false, " Path to privkey.pem to use for account (default: generate new)", 'string' ]
 , 'config-dir': [ false, " Configuration directory.", 'string', '~/letsencrypt/etc/' ]
-, server: [ false, " ACME Directory Resource URI.", 'string', '' ]
+, 'tls-sni-01-port': [ false, " Use TLS-SNI-01 challenge type with this port (only port 443 is valid with most production servers)", 'int' ]
+, 'http-01-port': [ false, " Use HTTP-01 challenge type with this port (only port 80 is valid with most production servers) (default: 80)", 'int' ]
+, 'dns-01': [ false, " Use DNS-01 challange type", 'boolean', false ]
 , standalone: [ false, " Obtain certs using a \"standalone\" webserver.", 'boolean', false ]
 , manual: [ false, " Print the token and key to the screen and wait for you to hit enter, giving you time to copy it somewhere before continuing (default: false)", 'boolean', false ]
 , webroot: [ false, " Obtain certs by placing files in a webroot directory.", 'boolean', false ]
@@ -36,6 +36,7 @@ cli.parse({
 , 'apache-reload': [ false, " Command to run to reload Apache.", 'string' ]
 , 'apache-disable': [ false, " Command to run to disable the site in Apache.", 'string' ]
 //, 'standalone-supported-challenges': [ false, " Supported challenges, order preferences are randomly chosen. (default: http-01,tls-sni-01)", 'string', 'http-01,tls-sni-01']
+, debug: [ false, " show traces and logs", 'boolean', false ]
 , 'work-dir': [ false, "(ignored)", 'string', '~/letsencrypt/var/lib/' ]
 , 'logs-dir': [ false, "(ignored)", 'string', '~/letsencrypt/var/log/' ]
 });
