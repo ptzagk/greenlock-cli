@@ -13,7 +13,7 @@ module.exports.run = function (args) {
     challengeType = 'dns-01';
     args.webrootPath = '';
     args.standalone = USE_DNS;
-  } else if (args.tlsSni01Port) {
+  } else if (args.tlsSni01Port || args.apache) {
     challengeType = 'tls-sni-01';
     args.webrootPath = '';
   } else /*if (args.http01Port)*/ {
@@ -22,6 +22,19 @@ module.exports.run = function (args) {
 
   if (args.manual) {
     leChallenge = require('le-challenge-manual').create({});
+  }
+  else if (args.apache) {
+    leChallenge = require('le-challenge-apache').create({
+      apachePath: args.apachePath
+    , apacheBind: args.apacheBind
+    , apachePort: args.apachePort
+    , apacheWebroot: args.apacheWebroot
+    , apacheTemplate: args.apacheTemplate
+    , apacheEnable: args.apacheEnable
+    , apacheCheck: args.apacheCheck
+    , apacheReload: args.apacheReload
+    , apacheDisable: args.apacheDisable
+    });
   }
   else if (args.webrootPath) {
     // webrootPath is all that really matters here
