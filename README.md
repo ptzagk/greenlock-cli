@@ -46,15 +46,27 @@ Want to use the **live server**?
 **Note**: This has really only been tested with single domains so if
 multiple domains doesn't work for you, file a bug.
 
-### Standalone
+### Standalone (primarily for testing)
 
-You can run standalone mode to get a cert **on the server** you will be
-using it for over ports **80 and 443 (or 5001)** like so:
+You can run standalone mode to get a cert **on the server**. You either use an
+http-01 challenge (the default) on port 80, or a tls-sni-01 challenge on port
+443 (or 5001). Like so:
 
 ```bash
 letsencrypt certonly \
   --agree-tos --email john.doe@example.com \
   --standalone \
+  --domains example.com,www.example.com \
+  --server https://acme-staging.api.letsencrypt.org/directory \
+  --config-dir ~/letsencrypt/etc
+```
+
+or
+
+```bash
+letsencrypt certonly \
+  --agree-tos --email john.doe@example.com \
+  --standalone --tls-sni-01-port 443 \
   --domains example.com,www.example.com \
   --server https://acme-staging.api.letsencrypt.org/directory \
   --config-dir ~/letsencrypt/etc
@@ -70,9 +82,10 @@ This option is great for testing, but since it requires the use of
 the same ports that your webserver needs, it isn't a good choice
 for production.
 
-### WebRoot (for production)
+### WebRoot (production option 1)
 
-You can specify the path to where you keep your `index.html` with `webroot`.
+You can specify the path to where you keep your `index.html` with `webroot`, as
+long as your server is serving plain HTTP on port 80.
 
 For example, if I want to get a domain for `example.com` and my `index.html` is
 at `/srv/www/example.com`, then I would use this command:
@@ -97,6 +110,67 @@ ls /etc/letsencrypt/live/
 
 You can use a cron job to run the script above every 80 days (the certificates expire after 90 days)
 so that you always have fresh certificates.
+
+### TLS SNI (production option 2)
+
+You can also integrate with a secure server. This is more complicated than the
+webroot option, but it allows you to obtain certificates with only port 443
+open. This facility was developed for the Apache webserver, but it could work
+with other servers as long as they support server name indication (SNI) and you
+can provide a configuration file template and hooks to install and uninstall it
+(without downtime). In fact, it doesn't even need to be a webserver (though it
+must run on port 443); it could be another server that performs SSL/TLS
+negotiation with SNI.
+
+The process works something like this. You would run:
+
+```bash
+sudo letsencrypt certonly \
+  --agree-tos --email john.doe@example.com \
+  --apache \
+  --config-dir /etc/letsencrypt \
+  --domains example.com,www.example.com \
+  --server https://acme-staging.api.letsencrypt.org/directory
+```
+
+Three files are then generated:
+
+* a configuration fragment: `some-long-string.conf`
+* a challenge-fulfilling certificate: `the-same-long-string.crt`
+* a private key: `the-same-long-string.key`
+
+A hook is then run to enable the fragment, e.g. by linking it (it should not be
+moved) into a `conf.d` directory (for Apache on Debian, `sites-enabled`). A
+second hook is then run to check the configuration is valid, to avoid
+accidental downtime, and then another to signal to the server to reload the
+configuration. The server will now serve the generated certificate on a special
+domain to prove you own the domain you're getting a certificate for.
+
+After the domain has been validated externally, hooks are run to disable the
+configuration fragment, and again check and reload the configuration.
+
+Find your brand new certs in:
+
+```
+ls /etc/letsencrypt/live/
+```
+
+To tailor this for your server setup, see all the `apache-` options in the list
+below. Also note that the following substitutions are available for use in the
+commands supplied to those options, and in any alternative template you
+provide:
+
+* `{{{token}}}`: the token
+* `{{{domain}}}`: the domain for which a certificate is being sought (beware of
+  this if using multiple domains per certificate)
+* `{{{subject}}}`: the domain for which the generated challenge-fulfilling
+  certificate must be used (only available when generating it)
+* `{{{cert}}}`: the path to the generated certificate: `apache-path/token.crt`
+* `{{{privkey}}}`: the path to the generated private key: `apache-path/token.key`
+* `{{{conf}}}`: the path to the generated config file: `apache-path/token.conf`
+* `{{{bind}}}`: the value of the `apache-bind` option
+* `{{{port}}}`: the value of the `apache-port` option
+* `{{{webroot}}}`: the value of the `apache-webroot` option
 
 ### Interactive (for debugging)
 
@@ -174,7 +248,7 @@ Options:
 
       --debug BOOLEAN           show traces and logs
 
-      --tls-sni-01-port NUMBER  Use TLS-SNI-01 challenge type with this port. (Default is 443)
+      --tls-sni-01-port NUMBER  Use TLS-SNI-01 challenge type with this port.
                                 (must be 443 with most production servers) (Boulder allows 5001 in testing mode)
 
       --http-01-port [NUMBER]   Use HTTP-01 challenge type with this port, used for SimpleHttp challenge. (Default is 80)
@@ -199,6 +273,34 @@ Options:
 
       --server [STRING]         ACME Directory Resource URI. (Default is https://acme-v01.api.letsencrypt.org/directory))
 
+      --apache BOOLEAN          Obtain certs using Apache virtual hosts.
+
+      --apache-path STRING      Path in which to store files for Apache virtual hosts.
+                                (Default is ~/letsencrypt/apache)
+
+      --apache-bind [STRING]    IP address to use for Apache virtual host. (Default is *)
+                                (This is used in the default template.)
+
+      --apache-port [NUMBER]    Port to use for Apache virtual host. (Default is 443)
+                                (This is used in the default template.)
+
+      --apache-webroot STRING   Webroot to use for Apache virtual host (e.g. an empty dir). 
+                                Nothing should actually be served from here. (Default is /var/www)
+
+      --apache-template STRING  Alternative template to use for Apache configuration file. 
+
+      --apache-enable STRING    Command to run to enable the site in Apache. 
+                                (Default is `ln -s {{{conf}}} /etc/apache2/sites-enabled`)
+
+      --apache-check STRING     Command to run to check Apache configuration. 
+                                (Default is `apache2ctl configtest`)
+
+      --apache-reload STRING    Command to run to reload Apache.
+                                (Default is `/etc/init.d/apache2 reload`)
+
+      --apache-disable STRING   Command to run to disable the site in Apache. 
+                                (Default is `rm /etc/apache2/sites-enabled/{{{token}}}.conf`)
+
       --standalone [BOOLEAN]    Obtain certs using a "standalone" webserver.  (Default is true)
 
       --manual [BOOLEAN]        Print the token and key to the screen and wait for you to hit enter,
@@ -206,7 +308,7 @@ Options:
 
       --webroot BOOLEAN         Obtain certs by placing files in a webroot directory.
 
-      --webroot-path STRING      public_html / webroot path.
+      --webroot-path STRING     public_html / webroot path.
 
   -h, --help                    Display help and usage details
 ```
