@@ -1,5 +1,7 @@
 'use strict';
 
+var DAY = 24 * 60 * 60 * 1000;
+
 var LE = require('letsencrypt');
 
 module.exports.run = function (args) {
@@ -73,6 +75,7 @@ module.exports.run = function (args) {
   , server: args.server
   , store: leStore
   , challenges: leChallenges
+  , renewWithin: args.renewWithin * DAY
   , duplicate: args.duplicate
   });
 
@@ -93,15 +96,33 @@ module.exports.run = function (args) {
 
   // Note: can't use args directly as null values will overwrite template values
   le.register({
-    domains: args.domains
+    debug: args.debug
   , email: args.email
   , agreeTos: args.agreeTos
-  , challengeType: challengeType
+  , domains: args.domains
   , rsaKeySize: args.rsaKeySize
+  , challengeType: challengeType
+  }).then(function (certs) {
+    if (!certs._renewing) {
+      return certs;
+    }
+    console.log("");
+    console.log("Got certificate(s) for " + certs.altnames.join(', '));
+    console.log("\tIssued at " + new Date(certs.issuedAt).toISOString() + "");
+    console.log("\tValid until " + new Date(certs.expiresAt).toISOString() + "");
+    console.log("");
+    console.log("Renewing them now");
+    return certs._renewing;
   }).then(function (certs) {
     if (servers) {
       servers.closeServers();
     }
+
+    console.log("");
+    console.log("Got certificate(s) for " + certs.altnames.join(', '));
+    console.log("\tIssued at " + new Date(certs.issuedAt).toISOString() + "");
+    console.log("\tValid until " + new Date(certs.expiresAt).toISOString() + "");
+    console.log("");
 
     // should get back account, path to certs, pems, etc?
     console.log('\nCertificates installed at:');
@@ -109,13 +130,7 @@ module.exports.run = function (args) {
       return /Path/.test(key);
     }).map(function (key) {
       return args[key];
-    }).join('\n').replace(/:hostname/, args.domains[0]));
-
-    console.log("");
-    console.log("Got certificate(s) for " + certs.altnames.join(', '));
-    console.log("\tIssued at " + new Date(certs.issuedAt).toISOString() + "");
-    console.log("\tValid until " + new Date(certs.expiresAt).toISOString() + "");
-    console.log("");
+    }).join('\n').replace(/:hostname/g, args.domains[0]));
 
     process.exit(0);
   }, function (err) {

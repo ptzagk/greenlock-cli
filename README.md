@@ -237,24 +237,19 @@ Usage:
   letsencrypt [OPTIONS] [ARGS]
 
 Options:
+      --server [STRING]         ACME Directory Resource URI. (Default is https://acme-v01.api.letsencrypt.org/directory))
+
       --email EMAIL             Email used for registration and recovery contact. (default: null)
+
+      --agree-tos BOOLEAN       Agree to the Let's Encrypt Subscriber Agreement
 
       --domains URL             Domain names to apply. For multiple domains you can enter a comma
                                 separated list of domains as a parameter. (default: [])
 
-      --duplicate BOOLEAN       Allow getting a certificate that duplicates an existing one
+      --renew-within [NUMBER]   Renew certificates this many days before expiry. (default: 7)
 
-      --agree-tos BOOLEAN       Agree to the Let's Encrypt Subscriber Agreement
-
-      --debug BOOLEAN           show traces and logs
-
-      --tls-sni-01-port NUMBER  Use TLS-SNI-01 challenge type with this port.
-                                (must be 443 with most production servers) (Boulder allows 5001 in testing mode)
-
-      --http-01-port [NUMBER]   Use HTTP-01 challenge type with this port, used for SimpleHttp challenge. (Default is 80)
-                                (must be 80 with most production servers)
-
-      --dns-01                  Use DNS-01 challenge type.
+      --duplicate BOOLEAN       Allow getting a certificate that duplicates an existing one/is
+                                an early renewal.
 
       --rsa-key-size [NUMBER]   Size (in bits) of the RSA key. (Default is 2048)
 
@@ -269,9 +264,26 @@ Options:
 
       --domain-key-path STRING  Path to privkey.pem to use for domain (default: generate new)
 
+      --account-key-path STRING Path to privkey.pem to use for account (default: generate new)
+
       --config-dir STRING       Configuration directory. (Default is ~/letsencrypt/etc/)
 
-      --server [STRING]         ACME Directory Resource URI. (Default is https://acme-v01.api.letsencrypt.org/directory))
+      --tls-sni-01-port NUMBER  Use TLS-SNI-01 challenge type with this port.
+                                (must be 443 with most production servers) (Boulder allows 5001 in testing mode)
+
+      --http-01-port [NUMBER]   Use HTTP-01 challenge type with this port, used for SimpleHttp challenge. (Default is 80)
+                                (must be 80 with most production servers)
+
+      --dns-01                  Use DNS-01 challenge type.
+
+      --standalone [BOOLEAN]    Obtain certs using a "standalone" webserver.  (Default is true)
+
+      --manual [BOOLEAN]        Print the token and key to the screen and wait for you to hit enter,
+                                giving you time to copy it somewhere before continuing. (Default is false)
+
+      --webroot BOOLEAN         Obtain certs by placing files in a webroot directory.
+
+      --webroot-path STRING     public_html / webroot path.
 
       --apache BOOLEAN          Obtain certs using Apache virtual hosts.
 
@@ -301,14 +313,7 @@ Options:
       --apache-disable STRING   Command to run to disable the site in Apache. 
                                 (Default is `rm /etc/apache2/sites-enabled/{{{token}}}.conf`)
 
-      --standalone [BOOLEAN]    Obtain certs using a "standalone" webserver.  (Default is true)
-
-      --manual [BOOLEAN]        Print the token and key to the screen and wait for you to hit enter,
-                                giving you time to copy it somewhere before continuing. (Default is false)
-
-      --webroot BOOLEAN         Obtain certs by placing files in a webroot directory.
-
-      --webroot-path STRING     public_html / webroot path.
+      --debug BOOLEAN           show traces and logs
 
   -h, --help                    Display help and usage details
 ```
