@@ -36,12 +36,12 @@
     "cli": "^0.11.1",
     "homedir": "^0.6.0",
     "le-acme-core": "^2.0.5",
-    "le-challenge-apache": "^2.0.1",
+    "le-challenge-hooks": "^2.0.0",
     "le-challenge-manual": "^2.0.0",
     "le-challenge-sni": "^2.0.0",
     "le-challenge-standalone": "^2.0.0",
     "le-store-certbot": "^2.0.2",
-    "letsencrypt": "^2.1.2",
+    "letsencrypt": "^2.1.8",
     "localhost.daplie.com-certificates": "^1.2.0",
     "mkdirp": "^0.5.1"
   }
