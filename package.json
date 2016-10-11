@@ -1,6 +1,6 @@
 {
   "name": "letsencrypt-cli",
-  "version": "2.1.3",
+  "version": "2.2.0",
   "description": "CLI for node-letsencrypt modeled after the official client",
   "main": "index.js",
   "bin": {
