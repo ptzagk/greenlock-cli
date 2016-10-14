@@ -111,23 +111,22 @@ ls /etc/letsencrypt/live/
 You can use a cron job to run the script above every 80 days (the certificates expire after 90 days)
 so that you always have fresh certificates.
 
-### TLS SNI (production option 2)
+### Hooks (production option 2)
 
 You can also integrate with a secure server. This is more complicated than the
 webroot option, but it allows you to obtain certificates with only port 443
-open. This facility was developed for the Apache webserver, but it could work
-with other servers as long as they support server name indication (SNI) and you
-can provide a configuration file template and hooks to install and uninstall it
-(without downtime). In fact, it doesn't even need to be a webserver (though it
-must run on port 443); it could be another server that performs SSL/TLS
-negotiation with SNI.
+open. This facility can work with any web server as long as it supports server
+name indication (SNI) and you can provide a configuration file template and
+shell hooks to install and uninstall the configuration (without downtime). In
+fact, it doesn't even need to be a webserver (though it must run on port 443);
+it could be another server that performs SSL/TLS negotiation with SNI.
 
 The process works something like this. You would run:
 
 ```bash
 sudo letsencrypt certonly \
   --agree-tos --email john.doe@example.com \
-  --apache \
+  --hooks --hooks-server apache2-debian \
   --config-dir /etc/letsencrypt \
   --domains example.com,www.example.com \
   --server https://acme-staging.api.letsencrypt.org/directory
@@ -149,28 +148,32 @@ domain to prove you own the domain you're getting a certificate for.
 After the domain has been validated externally, hooks are run to disable the
 configuration fragment, and again check and reload the configuration.
 
-Find your brand new certs in:
+You can then find your brand new certs in:
 
 ```
 ls /etc/letsencrypt/live/
 ```
 
-To tailor this for your server setup, see all the `apache-` options in the list
-below. Also note that the following substitutions are available for use in the
-commands supplied to those options, and in any alternative template you
-provide:
+Tailor to your server and distro using the `--hooks-server` option. So far, the
+following are supported (contributions for additional servers welcome):
+
+* apache2-debian
+
+To tweak it for your setup and taste, see all the `hooks-` options in the
+Command Line Options section below. Also note that the following substitutions
+are available for use in the hooks and the template:
 
 * `{{{token}}}`: the token
 * `{{{domain}}}`: the domain for which a certificate is being sought (beware of
   this if using multiple domains per certificate)
 * `{{{subject}}}`: the domain for which the generated challenge-fulfilling
   certificate must be used (only available when generating it)
-* `{{{cert}}}`: the path to the generated certificate: `apache-path/token.crt`
-* `{{{privkey}}}`: the path to the generated private key: `apache-path/token.key`
-* `{{{conf}}}`: the path to the generated config file: `apache-path/token.conf`
-* `{{{bind}}}`: the value of the `apache-bind` option
-* `{{{port}}}`: the value of the `apache-port` option
-* `{{{webroot}}}`: the value of the `apache-webroot` option
+* `{{{cert}}}`: the path to the generated certificate: `hooks-path/token.crt`
+* `{{{privkey}}}`: the path to the generated private key: `hooks-path/token.key`
+* `{{{conf}}}`: the path to the generated config file: `hooks-path/token.conf`
+* `{{{bind}}}`: the value of the `hooks-bind` option
+* `{{{port}}}`: the value of the `hooks-port` option
+* `{{{webroot}}}`: the value of the `hooks-webroot` option
 
 ### Interactive (for debugging)
 
@@ -230,7 +233,7 @@ you could change the permissions on them. **Probably a BAD IDEA**. Probabry a se
 sudo chown -R $(whoami) /etc/letsencrypt /var/lib/letsencrypt /var/log/letsencrypt
 ```
 
-## Command line Options
+## Command Line Options
 
 ```
 Usage:
@@ -285,33 +288,34 @@ Options:
 
       --webroot-path STRING     public_html / webroot path.
 
-      --apache BOOLEAN          Obtain certs using Apache virtual hosts.
+      --hooks BOOLEAN           Obtain certs with hooks that configure a webserver to meet TLS-SNI-01 challenges.
 
-      --apache-path STRING      Path in which to store files for Apache virtual hosts.
+      --hooks-path STRING       Path in which to store files for hooks.
                                 (Default is ~/letsencrypt/apache)
 
-      --apache-bind [STRING]    IP address to use for Apache virtual host. (Default is *)
-                                (This is used in the default template.)
+      --hooks-server STRING     Type of webserver to configure. Sets defaults for all the following --hooks- options.
+                                Either --hooks-server or --hooks-template must be given.
+                                (See the Hooks section above for a list of supported servers.)
 
-      --apache-port [NUMBER]    Port to use for Apache virtual host. (Default is 443)
-                                (This is used in the default template.)
+      --hooks-template STRING   Template to use for hooks configuration file.
+                                Either --hooks-server or --hooks-template must be given.
 
-      --apache-webroot STRING   Webroot to use for Apache virtual host (e.g. an empty dir). 
+      --hooks-bind STRING       IP address to use in configuration for hooks. (Default is *)
+
+      --hooks-port STRING       Port to use in configuration for hooks. (Default is 443)
+
+      --hooks-webroot STRING    Webroot to use in configuration for hooks (e.g. empty dir).
                                 Nothing should actually be served from here. (Default is /var/www)
 
-      --apache-template STRING  Alternative template to use for Apache configuration file. 
+      --hooks-pre-enable STRING Hook to check the webserver configuration prior to enabling.
 
-      --apache-enable STRING    Command to run to enable the site in Apache. 
-                                (Default is `ln -s {{{conf}}} /etc/apache2/sites-enabled`)
+      --hooks-enable STRING     Hook to enable the webserver configuration.
 
-      --apache-check STRING     Command to run to check Apache configuration. 
-                                (Default is `apache2ctl configtest`)
+      --hooks-pre-reload STRING Hook to check the webserver configuration prior to reloading.
 
-      --apache-reload STRING    Command to run to reload Apache.
-                                (Default is `/etc/init.d/apache2 reload`)
+      --hooks-reload STRING     Hook to reload the webserver.
 
-      --apache-disable STRING   Command to run to disable the site in Apache. 
-                                (Default is `rm /etc/apache2/sites-enabled/{{{token}}}.conf`)
+      --hooks-disable STRING    Hook to disable the webserver configuration.
 
       --debug BOOLEAN           show traces and logs
 

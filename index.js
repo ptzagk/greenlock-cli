@@ -15,7 +15,7 @@ module.exports.run = function (args) {
     challengeType = 'dns-01';
     args.webrootPath = '';
     args.standalone = USE_DNS;
-  } else if (args.tlsSni01Port || args.apache) {
+  } else if (args.tlsSni01Port || args.hooks) {
     challengeType = 'tls-sni-01';
     args.webrootPath = '';
   } else /*if (args.http01Port)*/ {
@@ -25,17 +25,19 @@ module.exports.run = function (args) {
   if (args.manual) {
     leChallenge = require('le-challenge-manual').create({});
   }
-  else if (args.apache) {
-    leChallenge = require('le-challenge-apache').create({
-      apachePath: args.apachePath
-    , apacheBind: args.apacheBind
-    , apachePort: args.apachePort
-    , apacheWebroot: args.apacheWebroot
-    , apacheTemplate: args.apacheTemplate
-    , apacheEnable: args.apacheEnable
-    , apacheCheck: args.apacheCheck
-    , apacheReload: args.apacheReload
-    , apacheDisable: args.apacheDisable
+  else if (args.hooks) {
+    leChallenge = require('le-challenge-hooks').create({
+      hooksPath: args.hooksPath
+    , hooksServer: args.hooksServer
+    , hooksTemplate: args.hooksTemplate
+    , hooksBind: args.hooksBind
+    , hooksPort: args.hooksPort
+    , hooksWebroot: args.hooksWebroot
+    , hooksPreEnable: args.hooksPreEnable
+    , hooksEnable: args.hooksEnable
+    , hooksPreReload: args.hooksPreReload
+    , hooksReload: args.hooksReload
+    , hooksDisable: args.hooksDisable
     });
   }
   else if (args.webrootPath) {
@@ -52,9 +54,10 @@ module.exports.run = function (args) {
     servers = require('./lib/servers').create(leChallenge);
   }
 
+  var privkeyPath = args.domainKeyPath || ':configDir/live/:hostname/privkey.pem'; //args.privkeyPath
   leStore = require('le-store-certbot').create({
     configDir: args.configDir
-  , privkeyPath: args.domainKeyPath || ':configDir/live/:hostname/privkey.pem' //args.privkeyPath
+  , privkeyPath: privkeyPath
   , fullchainPath: args.fullchainPath
   , certPath: args.certPath
   , chainPath: args.chainPath
@@ -123,14 +126,26 @@ module.exports.run = function (args) {
     console.log("\tIssued at " + new Date(certs.issuedAt).toISOString() + "");
     console.log("\tValid until " + new Date(certs.expiresAt).toISOString() + "");
     console.log("");
+    console.log('Private key installed at:');
+    console.log(
+      privkeyPath
+      .replace(/:configDir/g, args.configDir)
+      .replace(/:hostname/g, args.domains[0])
+    );
+    console.log("");
 
     // should get back account, path to certs, pems, etc?
-    console.log('\nCertificates installed at:');
-    console.log(Object.keys(args).filter(function (key) {
-      return /Path/.test(key);
-    }).map(function (key) {
-      return args[key];
-    }).join('\n').replace(/:hostname/g, args.domains[0]));
+    console.log('Certificates installed at:');
+    console.log(
+      [
+        args.certPath
+      , args.chainPath
+      , args.fullchainPath
+      ].join('\n')
+      .replace(/:configDir/g, args.configDir)
+      .replace(/:hostname/g, args.domains[0])
+    );
+    console.log("");
 
     process.exit(0);
   }, function (err) {
