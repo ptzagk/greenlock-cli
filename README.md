@@ -1,3 +1,15 @@
+Daplie is Taking Back the Internet!
+--------------
+
+[![](http://i.imgur.com/eG1lUZr.jpg)](https://daplie.com/preorder/)
+
+Stop serving the empire and join the rebel alliance!
+
+* [Invest in Daplie on Wefunder](https://daplie.com/invest/)
+* [Pre-order Cloud](https://daplie.com/preorder/), The World's First Home Server for Everyone
+
+# letsencrypt-cli (for node.js)
+
 [![Join the chat at https://gitter.im/Daplie/letsencrypt-express](https://badges.gitter.im/Daplie/letsencrypt-express.svg)](https://gitter.im/Daplie/letsencrypt-express?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 | [letsencrypt (library)](https://github.com/Daplie/node-letsencrypt)
@@ -6,8 +18,6 @@
 | [letsencrypt-koa](https://github.com/Daplie/letsencrypt-koa)
 | [letsencrypt-hapi](https://github.com/Daplie/letsencrypt-hapi)
 |
-
-# letsencrypt-cli (for node.js)
 
 CLI for node-letsencrypt modeled after the official client.
 
