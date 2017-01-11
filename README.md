@@ -9,5 +9,8 @@ greenlock-cli / letsencrypt-cli
 | [greenlock-hapi](https://git.daplie.com/Daplie/greenlock-hapi)
 |
 
+Moved
+-----
+
 [greenlock-cli](https://git.daplie.com/Daplie/greenlock-cli) (previously named [letsencrypt-cli](https://git.daplie.com/Daplie/greenlock-cli))
 has moved to https://git.daplie.com/Daplie/greenlock-cli
